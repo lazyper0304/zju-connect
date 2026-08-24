@@ -104,6 +104,11 @@ func login(server string, username string, password string) string {
 		})
 	}
 
+	// yibinu-patch: some Sangfor IPv6 frontends reject the legacy TLS 1.1/RC4
+	// tunnel handshake with "protocol version not supported" while the IPv4
+	// entry accepts it. Pin everything to IPv4 on mobile.
+	newClient.SetForceIPv4(true)
+
 	// Close the old client and clear vpnClient to nil during setup so that
 	// concurrent StartStack calls see nil and return early rather than
 	// operating on an uninitialized client.

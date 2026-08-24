@@ -64,11 +64,22 @@ type Client struct {
 	// (RndImg=1). When set, it receives the raw PNG bytes of the captcha image
 	// and must return the user-entered code. Used by the gomobile mobile build.
 	randCodeProvider func(img []byte) string
+
+	// forceIPv4 restricts all outgoing dials (HTTP + raw TLS tunnel) to IPv4.
+	// Used by the gomobile mobile build: some Sangfor frontends reject the
+	// legacy TLS 1.1/RC4 tunnel ClientHello on their IPv6 entry with
+	// "protocol version not supported", while IPv4 works.
+	forceIPv4 bool
 }
 
 // SetRandCodeProvider registers an interactive image-captcha provider.
 func (c *Client) SetRandCodeProvider(fn func(img []byte) string) {
 	c.randCodeProvider = fn
+}
+
+// SetForceIPv4 makes every dial (HTTP layer included) use tcp4 only.
+func (c *Client) SetForceIPv4(v bool) {
+	c.forceIPv4 = v
 }
 
 func NewClient(server, username, password, totpSecret string, tlsCert tls.Certificate, twfID string, testMultiLine, parseResource, useDomainResource bool) *Client {
@@ -292,6 +303,10 @@ func (c *Client) setHTTPTransport(tlsConfig *tls.Config) {
 }
 
 func (c *Client) dialContext(ctx context.Context, network, address string) (net.Conn, error) {
+	if c.forceIPv4 && network == "tcp" {
+		// yibinu-patch: restrict to IPv4 (see SetForceIPv4).
+		network = "tcp4"
+	}
 	if c.underlayDialer == nil {
 		return (&net.Dialer{Timeout: easyConnectDialTimeout, KeepAlive: 30 * time.Second}).DialContext(ctx, network, address)
 	}
