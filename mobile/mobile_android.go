@@ -4,6 +4,7 @@ package mobile
 import (
 	"crypto/tls"
 	"encoding/base64"
+	"strings"
 	"sync"
 
 	"github.com/mythologyli/zju-connect/client/easyconnect"
@@ -77,6 +78,14 @@ func login(server string, username string, password string) string {
 	defer loginMu.Unlock()
 	setLastError(nil)
 
+	// yibinu-patch: zju-connect expects "host:port" (e.g. vpn.example.com:443).
+	// The HTTP layer defaults to :443 via URL, but requestToken/requestIP dial
+	// c.server directly — a bare hostname fails with "missing port in address"
+	// before any request is sent.
+	if !strings.Contains(server, ":") {
+		server = server + ":443"
+	}
+
 	newClient := easyconnect.NewClient(
 		server,
 		username,
@@ -108,6 +117,7 @@ func login(server string, username string, password string) string {
 
 	err := newClient.Setup("", "", false)
 	if err != nil {
+		log.Printf("Login Setup failed: %v", err)
 		setLastError(err)
 		newClient.Close()
 		return ""
@@ -117,6 +127,7 @@ func login(server string, username string, password string) string {
 
 	clientIP, err := newClient.IP()
 	if err != nil {
+		log.Printf("Login IP failed: %v", err)
 		setLastError(err)
 		newClient.Close()
 		return ""
