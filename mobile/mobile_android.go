@@ -1,3 +1,4 @@
+// yibinu-patch: interactive captcha + lastError support
 package mobile
 
 import (
