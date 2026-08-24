@@ -139,7 +139,14 @@ func (c *Client) loginAuthAndPsw(graphCodeFile string) error {
 
 	randCode := ""
 	if rndImg == "1" {
-		if graphCodeFile != "" {
+		if c.randCodeProvider != nil {
+			img, imgErr := c.fetchRandCodeImage()
+			if imgErr != nil {
+				return imgErr
+			}
+			randCode = c.randCodeProvider(img)
+			log.Printf("Rand code received from provider (%d chars)", len(randCode))
+		} else if graphCodeFile != "" {
 			addr = "https://" + c.server + "/por/rand_code.csp?apiversion=1"
 			log.Printf("Request: %s", addr)
 			req, err := http.NewRequestWithContext(c.lifecycleCtx, http.MethodGet, addr, nil)
@@ -248,6 +255,28 @@ func (c *Client) loginAuthAndPsw(graphCodeFile string) error {
 	log.Printf("TWFID has been authorized")
 
 	return nil
+}
+
+// fetchRandCodeImage downloads the raw image captcha from the server.
+func (c *Client) fetchRandCodeImage() ([]byte, error) {
+	addr := "https://" + c.server + "/por/rand_code.csp?apiversion=1"
+	log.Printf("Request: %s", addr)
+	req, err := http.NewRequestWithContext(c.lifecycleCtx, http.MethodGet, addr, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Cookie", "TWFID="+c.twfID)
+	req.Header.Set("User-Agent", "EasyConnect_windows")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+
+	return io.ReadAll(resp.Body)
 }
 
 func (c *Client) loginSMS() error {

@@ -2,6 +2,7 @@ package mobile
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"sync"
 
 	"github.com/mythologyli/zju-connect/client/easyconnect"
@@ -12,6 +13,40 @@ import (
 var vpnClient *easyconnect.Client
 var vpnClientMu sync.Mutex
 var loginMu sync.Mutex
+
+// CaptchaProvider is implemented on the Java/Kotlin side to display the image
+// captcha and return the user-entered code. GetCaptcha may block until the
+// user submits.
+type CaptchaProvider interface {
+	GetCaptcha(imageBase64 string) string
+}
+
+var captchaProvider CaptchaProvider
+
+// lastError records why the most recent Login attempt failed ("" if none).
+var lastErrorMutex sync.RWMutex
+var lastErrorStr string
+
+func SetCaptchaProvider(p CaptchaProvider) {
+	captchaProvider = p
+}
+
+// LastError returns the error message of the most recent Login failure.
+func LastError() string {
+	lastErrorMutex.RLock()
+	defer lastErrorMutex.RUnlock()
+	return lastErrorStr
+}
+
+func setLastError(err error) {
+	lastErrorMutex.Lock()
+	defer lastErrorMutex.Unlock()
+	if err == nil {
+		lastErrorStr = ""
+	} else {
+		lastErrorStr = err.Error()
+	}
+}
 
 func Login(server string, username string, password string) string {
 	log.Init()
@@ -39,6 +74,7 @@ func Logout() {
 func login(server string, username string, password string) string {
 	loginMu.Lock()
 	defer loginMu.Unlock()
+	setLastError(nil)
 
 	newClient := easyconnect.NewClient(
 		server,
@@ -51,6 +87,12 @@ func login(server string, username string, password string) string {
 		false,
 		false,
 	)
+
+	if captchaProvider != nil {
+		newClient.SetRandCodeProvider(func(img []byte) string {
+			return captchaProvider.GetCaptcha(base64.StdEncoding.EncodeToString(img))
+		})
+	}
 
 	// Close the old client and clear vpnClient to nil during setup so that
 	// concurrent StartStack calls see nil and return early rather than
@@ -65,6 +107,7 @@ func login(server string, username string, password string) string {
 
 	err := newClient.Setup("", "", false)
 	if err != nil {
+		setLastError(err)
 		newClient.Close()
 		return ""
 	}
@@ -73,6 +116,7 @@ func login(server string, username string, password string) string {
 
 	clientIP, err := newClient.IP()
 	if err != nil {
+		setLastError(err)
 		newClient.Close()
 		return ""
 	}

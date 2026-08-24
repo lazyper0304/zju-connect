@@ -59,6 +59,16 @@ type Client struct {
 	requestIPKeepAlive sync.Once
 	keepAliveStarted   sync.Once
 	closeOnce          sync.Once
+
+	// randCodeProvider is an optional interactive callback for image captcha
+	// (RndImg=1). When set, it receives the raw PNG bytes of the captcha image
+	// and must return the user-entered code. Used by the gomobile mobile build.
+	randCodeProvider func(img []byte) string
+}
+
+// SetRandCodeProvider registers an interactive image-captcha provider.
+func (c *Client) SetRandCodeProvider(fn func(img []byte) string) {
+	c.randCodeProvider = fn
 }
 
 func NewClient(server, username, password, totpSecret string, tlsCert tls.Certificate, twfID string, testMultiLine, parseResource, useDomainResource bool) *Client {
