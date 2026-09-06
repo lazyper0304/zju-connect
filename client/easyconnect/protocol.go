@@ -67,7 +67,17 @@ func (c *Client) tlsConn(ctx context.Context) (*tls.UConn, error) {
 	_ = conn.SetClientRandom(random)
 	_ = conn.SetTLSVers(tls.VersionTLS11, tls.VersionTLS11, []tls.TLSExtension{})
 	conn.HandshakeState.Hello.Vers = tls.VersionTLS11
-	conn.HandshakeState.Hello.CipherSuites = []uint16{tls.TLS_RSA_WITH_RC4_128_SHA, tls.FAKE_TLS_EMPTY_RENEGOTIATION_INFO_SCSV}
+	// yibinu-patch: the school's TLS front (M7.6.8R2, 2026-09) no longer
+	// accepts RC4 on either entry ("handshake failure"). RSA+AES-CBC is
+	// accepted on both IPv4 and IPv6; keep RC4 first-row fallback for older
+	// Sangfor firmwares that still expect it. AES_128_CBC_SHA leads because
+	// the probe matrix confirmed it negotiates on yibinu.
+	conn.HandshakeState.Hello.CipherSuites = []uint16{
+		tls.TLS_RSA_WITH_AES_128_CBC_SHA,
+		tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		tls.TLS_RSA_WITH_RC4_128_SHA,
+		tls.FAKE_TLS_EMPTY_RENEGOTIATION_INFO_SCSV,
+	}
 	conn.HandshakeState.Hello.CompressionMethods = []uint8{0}
 	conn.HandshakeState.Hello.SessionId = []byte{'L', '3', 'I', 'P', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	conn.Extensions = []tls.TLSExtension{&fakeHeartBeatExtension{}}

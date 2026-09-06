@@ -1,12 +1,12 @@
 // yibinu-patch: interactive image captcha over stdin/stdout for GUI wrappers.
 //
-// The smartcampus Windows client runs zju-connect as a headless child process.
+// The smartcampus Windows client runs yibinu-connect as a headless child process.
 // When the Sangfor server enforces an image captcha (RndImg=1), the wrapper
 // needs to relay the captcha image to the user and feed the answer back.
 // This package implements a minimal line protocol over the standard streams:
 //
-//	zju-connect -> wrapper:  @CAPTCHA:<base64 image>\n
-//	wrapper -> zju-connect:  @CAPTCHA_ANSWER:<text>\n
+//	yibinu-connect -> wrapper:  @CAPTCHA:<base64 image>\n
+//	wrapper -> yibinu-connect:  @CAPTCHA_ANSWER:<text>\n
 //
 // Log output goes to stdout too, so the prefix "@CAPTCHA:" is reserved and
 // must never appear in log lines.

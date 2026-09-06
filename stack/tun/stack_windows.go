@@ -17,7 +17,7 @@ import (
 )
 
 const guid = "{4F5CDE94-D2A3-4AA5-A4A3-0FE6CB909E83}"
-const interfaceName = "ZJU Connect"
+const interfaceName = "Yibinu Connect"
 
 type Endpoint struct {
 	client client.Client
@@ -133,7 +133,7 @@ func NewStack(client client.Client, dnsHijack, fakeIP bool, ipResources []client
 		log.Printf("Run %s failed: %v", command.String(), err)
 	}
 
-	command = exec.Command("netsh", "interface", "ipv4", "delete", "dnsservers", "ZJU Connect", "all")
+	command = exec.Command("netsh", "interface", "ipv4", "delete", "dnsservers", "Yibinu Connect", "all")
 	err = command.Run()
 	if err != nil {
 		log.Printf("Run %s failed: %v", command.String(), err)
@@ -143,7 +143,7 @@ func NewStack(client client.Client, dnsHijack, fakeIP bool, ipResources []client
 		if fakeIP {
 			dnsServerIP = "198.18.0.1"
 		}
-		command = exec.Command("netsh", "interface", "ipv4", "add", "dnsservers", "ZJU Connect", dnsServerIP)
+		command = exec.Command("netsh", "interface", "ipv4", "add", "dnsservers", "Yibinu Connect", dnsServerIP)
 		err = command.Run()
 		if err != nil {
 			log.Printf("Run %s failed: %v", command.String(), err)
@@ -152,7 +152,7 @@ func NewStack(client client.Client, dnsHijack, fakeIP bool, ipResources []client
 
 	hook_func.RegisterTerminalFunc("Close Tun Device", func(ctx context.Context) error {
 		dev.Close()
-		closeCommand := exec.Command("netsh", "interface", "ipv4", "delete", "dnsservers", "ZJU Connect", "all")
+		closeCommand := exec.Command("netsh", "interface", "ipv4", "delete", "dnsservers", "Yibinu Connect", "all")
 		return closeCommand.Run()
 	})
 	return s, nil

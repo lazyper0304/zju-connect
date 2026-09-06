@@ -69,7 +69,7 @@ func NewStack(client client.Client, dnsHijack, fakeIP bool, ipResources []client
 		return nil, err
 	}
 	ipPrefix, _ := netip.ParsePrefix(s.endpoint.ip.String() + "/32")
-	tunName := "ZJU-Connect"
+	tunName := "Yibinu-Connect"
 	tunName = tun.CalculateInterfaceName(tunName)
 
 	tunOptions := tun.Options{

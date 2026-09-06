@@ -37,14 +37,14 @@ var conf configs.Config
 func main() {
 	log.Init()
 
-	log.Println("Start ZJU Connect " + zjuConnectVersionString())
+	log.Println("Start Yibinu Connect " + zjuConnectVersionString())
 	if conf.DebugDump {
 		log.EnableDebug()
 	}
 
 	if errs := hook_func.ExecInitialFunc(context.Background(), conf); errs != nil {
 		for _, err := range errs {
-			log.Printf("Initial ZJU-Connect failed: %s", err)
+			log.Printf("Initial Yibinu-Connect failed: %s", err)
 		}
 		os.Exit(1)
 	}
@@ -381,12 +381,12 @@ func main() {
 		signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 		<-quit
 	}
-	log.Println("Shutdown ZJU-Connect ......")
+	log.Println("Shutdown Yibinu-Connect ......")
 	if errs := hook_func.ExecTerminalFunc(context.Background()); errs != nil {
 		for _, err := range errs {
-			log.Printf("Shutdown ZJU-Connect failed: %s", err)
+			log.Printf("Shutdown Yibinu-Connect failed: %s", err)
 		}
 	} else {
-		log.Println("Shutdown ZJU-Connect success, Bye~")
+		log.Println("Shutdown Yibinu-Connect success, Bye~")
 	}
 }

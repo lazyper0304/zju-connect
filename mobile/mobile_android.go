@@ -78,7 +78,7 @@ func login(server string, username string, password string) string {
 	defer loginMu.Unlock()
 	setLastError(nil)
 
-	// yibinu-patch: zju-connect expects "host:port" (e.g. vpn.example.com:443).
+	// yibinu-patch: yibinu-connect expects "host:port" (e.g. vpn.example.com:443).
 	// The HTTP layer defaults to :443 via URL, but requestToken/requestIP dial
 	// c.server directly — a bare hostname fails with "missing port in address"
 	// before any request is sent.

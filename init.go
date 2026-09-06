@@ -41,7 +41,7 @@ func parseTOMLConfig(configFile string, conf *configs.Config) error {
 
 	_, err := toml.DecodeFile(configFile, &confTOML)
 	if err != nil {
-		return errors.New("ZJU Connect: error parsing the config file")
+		return errors.New("Yibinu Connect: error parsing the config file")
 	}
 
 	conf.Protocol = getTOMLVal(confTOML.Protocol, "easyconnect")
@@ -97,15 +97,15 @@ func parseTOMLConfig(configFile string, conf *configs.Config) error {
 
 	for _, singlePortForwarding := range confTOML.PortForwarding {
 		if singlePortForwarding.NetworkType == nil {
-			return errors.New("ZJU Connect: network type is not set")
+			return errors.New("Yibinu Connect: network type is not set")
 		}
 
 		if singlePortForwarding.BindAddress == nil {
-			return errors.New("ZJU Connect: bind address is not set")
+			return errors.New("Yibinu Connect: bind address is not set")
 		}
 
 		if singlePortForwarding.RemoteAddress == nil {
-			return errors.New("ZJU Connect: remote address is not set")
+			return errors.New("Yibinu Connect: remote address is not set")
 		}
 
 		conf.PortForwardingList = append(conf.PortForwardingList, configs.SinglePortForwarding{
@@ -117,12 +117,12 @@ func parseTOMLConfig(configFile string, conf *configs.Config) error {
 
 	for _, singleCustomDns := range confTOML.CustomDNS {
 		if singleCustomDns.HostName == nil {
-			return errors.New("ZJU Connect: host name is not set")
+			return errors.New("Yibinu Connect: host name is not set")
 		}
 
 		if singleCustomDns.IP == nil {
-			fmt.Println("ZJU Connect: IP is not set")
-			return errors.New("ZJU Connect: IP is not set")
+			fmt.Println("Yibinu Connect: IP is not set")
+			return errors.New("Yibinu Connect: IP is not set")
 		}
 
 		conf.CustomDNSList = append(conf.CustomDNSList, configs.SingleCustomDNS{
@@ -134,8 +134,8 @@ func parseTOMLConfig(configFile string, conf *configs.Config) error {
 	for _, singleCustomProxyDomain := range confTOML.CustomProxyDomain {
 		var domainRegex = regexp.MustCompile(`^[a-zA-Z\d-]+(\.[a-zA-Z\d-]+)*\.[a-zA-Z]{2,}$`)
 		if !domainRegex.MatchString(singleCustomProxyDomain) {
-			fmt.Printf("ZJU Connect: %s is not a valid domain\n", singleCustomProxyDomain)
-			return fmt.Errorf("ZJU Connect: %s is not a valid domain", singleCustomProxyDomain)
+			fmt.Printf("Yibinu Connect: %s is not a valid domain\n", singleCustomProxyDomain)
+			return fmt.Errorf("Yibinu Connect: %s is not a valid domain", singleCustomProxyDomain)
 		}
 		conf.CustomProxyDomain = append(conf.CustomProxyDomain, singleCustomProxyDomain)
 	}
@@ -180,7 +180,7 @@ func init() {
 	flag.StringVar(&conf.RemoteDNSServer, "zju-dns-server", "auto", "Remote DNS server address. Set to 'auto' to use remote DNS server provided by server") // TODO: rename to remote-dns-server
 	flag.StringVar(&conf.SecondaryDNSServer, "secondary-dns-server", "auto", "Secondary DNS server address. Use auto for the server policy value")
 	flag.StringVar(&conf.DNSServerBind, "dns-server-bind", "", "The address DNS server listens on (e.g. 127.0.0.1:53)")
-	flag.BoolVar(&conf.DNSHijack, "dns-hijack", false, "Hijack all dns query to ZJU Connect. False by default.")
+	flag.BoolVar(&conf.DNSHijack, "dns-hijack", false, "Hijack all dns query to Yibinu Connect. False by default.")
 	flag.BoolVar(&conf.FakeIP, "fake-ip", false, "Enable Fake IP for DNS hijack")
 	flag.StringVar(&conf.GraphCodeFile, "graph-code-file", "", "Graph Check Code File")
 	flag.StringVar(&conf.BindInterface, "bind-interface", "", "Bind VPN underlay connections to this network interface (takes precedence over auto detection)")
@@ -214,7 +214,7 @@ func init() {
 	flag.Parse()
 
 	if showVersion {
-		fmt.Printf("ZJU Connect %s\n", zjuConnectVersionString())
+		fmt.Printf("Yibinu Connect %s\n", zjuConnectVersionString())
 		os.Exit(0)
 	}
 
@@ -278,7 +278,7 @@ func init() {
 			for _, forwardingString := range forwardingStringList {
 				addressStringList := strings.Split(forwardingString, "-")
 				if len(addressStringList) != 2 {
-					fmt.Fprintln(os.Stderr, "ZJU Connect: wrong tcp port forwarding format")
+					fmt.Fprintln(os.Stderr, "Yibinu Connect: wrong tcp port forwarding format")
 					os.Exit(1)
 				}
 
@@ -295,7 +295,7 @@ func init() {
 			for _, forwardingString := range forwardingStringList {
 				addressStringList := strings.Split(forwardingString, "-")
 				if len(addressStringList) != 2 {
-					fmt.Fprintln(os.Stderr, "ZJU Connect: wrong udp port forwarding format")
+					fmt.Fprintln(os.Stderr, "Yibinu Connect: wrong udp port forwarding format")
 					os.Exit(1)
 				}
 
@@ -312,7 +312,7 @@ func init() {
 			for _, dnsString := range dnsList {
 				dnsStringSplit := strings.Split(dnsString, ":")
 				if len(dnsStringSplit) != 2 {
-					fmt.Fprintln(os.Stderr, "ZJU Connect: wrong custom dns format")
+					fmt.Fprintln(os.Stderr, "Yibinu Connect: wrong custom dns format")
 					os.Exit(1)
 				}
 
@@ -328,7 +328,7 @@ func init() {
 			for _, domain := range domainList {
 				var domainRegex = regexp.MustCompile(`^[a-zA-Z\d-]+(\.[a-zA-Z\d-]+)*\.[a-zA-Z]{2,}$`)
 				if !domainRegex.MatchString(domain) {
-					fmt.Fprintf(os.Stderr, "ZJU Connect: %s is not a valid domain\n", domain)
+					fmt.Fprintf(os.Stderr, "Yibinu Connect: %s is not a valid domain\n", domain)
 					os.Exit(1)
 				}
 				conf.CustomProxyDomain = append(conf.CustomProxyDomain, domain)
@@ -352,7 +352,7 @@ func init() {
 		}
 	}
 	if missing {
-		fmt.Println("ZJU Connect: missing required arguments")
+		fmt.Println("Yibinu Connect: missing required arguments")
 		fmt.Println("Please see: https://github.com/mythologyli/zju-connect")
 		fmt.Println("\nUsage:")
 		flag.PrintDefaults()
@@ -361,10 +361,10 @@ func init() {
 	}
 
 	if conf.Protocol == "atrust" && conf.ServerAddress == "rvpn.zju.edu.cn" {
-		fmt.Println("ZJU Connect: set default aTrust server address to vpn.zju.edu.cn")
+		fmt.Println("Yibinu Connect: set default aTrust server address to vpn.zju.edu.cn")
 		conf.ServerAddress = "vpn.zju.edu.cn"
 	} else if conf.Protocol == "easyconnect" && conf.ServerAddress == "vpn.zju.edu.cn" {
-		fmt.Println("ZJU Connect: set default EasyConnect server address to rvpn.zju.edu.cn")
+		fmt.Println("Yibinu Connect: set default EasyConnect server address to rvpn.zju.edu.cn")
 		conf.ServerAddress = "rvpn.zju.edu.cn"
 	}
 }
