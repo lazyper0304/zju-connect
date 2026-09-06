@@ -20,6 +20,7 @@ import (
 	"github.com/mythologyli/zju-connect/configs"
 	"github.com/mythologyli/zju-connect/dial"
 	"github.com/mythologyli/zju-connect/internal/hook_func"
+	"github.com/mythologyli/zju-connect/internal/captchastdio"
 	"github.com/mythologyli/zju-connect/log"
 	"github.com/mythologyli/zju-connect/resolve"
 	"github.com/mythologyli/zju-connect/service"
@@ -81,6 +82,19 @@ func main() {
 			!conf.DisableServerConfig,
 			!conf.SkipDomainResource,
 		)
+
+		// yibinu-patch: interactive image captcha (RndImg=1) for the CLI build.
+		// Mobile wires SetRandCodeProvider in mobile_android.go; the CLI had no
+		// provider, so servers enforcing a captcha failed login outright.
+		if conf.CaptchaStdio {
+			vpnClient.(*easyconnectclient.Client).SetRandCodeProvider(captchastdio.Serve)
+		}
+		// yibinu-patch: some Sangfor frontends (e.g. vpn.yibinu.edu.cn) reject
+		// the legacy TLS 1.1/RC4 tunnel handshake on their IPv6 entry. Mobile
+		// always pins IPv4; give the CLI the same knob.
+		if conf.ForceIPv4 {
+			vpnClient.(*easyconnectclient.Client).SetForceIPv4(true)
+		}
 
 		log.Printf("VPN protocol: %s", conf.Protocol)
 		err := vpnClient.(*easyconnectclient.Client).Setup(conf.GraphCodeFile, conf.BindInterface, conf.AutoDetectInterface)

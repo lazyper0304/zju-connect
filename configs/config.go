@@ -34,6 +34,13 @@ type (
 		BindInterface       string
 		AutoDetectInterface bool
 
+		// yibinu-patch: interactive captcha and IPv4 pinning for the CLI build.
+		// CaptchaStdio exchanges captcha input over stdin/stdout using the
+		// "@CAPTCHA:" / "@CAPTCHA_ANSWER:" line protocol (used by the
+		// smartcampus Windows client). ForceIPv4 pins every dial to tcp4.
+		CaptchaStdio bool
+		ForceIPv4    bool
+
 		// EasyConnect fields
 		TOTPSecret          string
 		CertFile            string
@@ -126,6 +133,8 @@ type (
 		ATrustServerCertSHA256  *string                    `toml:"atrust_server_cert_sha256"`
 		BindInterface           *string                    `toml:"bind_interface"`
 		AutoDetectInterface     *bool                      `toml:"auto_detect_interface"`
+		CaptchaStdio            *bool                      `toml:"captcha_stdio"`
+		ForceIPv4               *bool                      `toml:"force_ipv4"`
 	}
 
 	SinglePortForwardingTOML struct {
